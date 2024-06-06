@@ -16,15 +16,13 @@ class V1::Products < Grape::API
             failure [[404, 'Product Not Found'], [500, 'Internal Server Error']]
         end
 
-
         params do
             requires :id, type: Integer
         end
-    
 
         get ':id' do
             product = Product.find_by(id: params[:id])
-            if product
+        if product
                 present product, with: V1::Entities::SingleProduct  
             else
                 error!({ error: 'Product Not Found' }, 404)
@@ -35,7 +33,6 @@ class V1::Products < Grape::API
 
 
 
-
         
         # Endpoint to create a new product---------------------------------------------------------------------------------------
         desc 'Create a new product'do
@@ -43,13 +40,11 @@ class V1::Products < Grape::API
             failure [422, 'DB not saved']
         end
 
-
         params do
             requires :name, type: String
             requires :price, type: Integer
             requires :description, type: String
         end
-
 
         post do
             product = Product.create!(name: params[:name],price: params[:price],description: params[:description])
@@ -97,11 +92,9 @@ class V1::Products < Grape::API
             failure [[404, 'Product Not Found'], [500, 'Internal Server Error']]
         end
 
-
         params do
             requires :id, type: Integer
         end
-
 
         delete ':id' do
             product = Product.find_by(id: params[:id])
@@ -112,7 +105,5 @@ class V1::Products < Grape::API
                 error!({ error: 'Product Not Found' }, 404)
             end
         end
-
-        
     end
 end
