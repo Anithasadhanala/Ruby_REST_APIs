@@ -1,7 +1,11 @@
 class V1::Products < Grape::API
+
+
+
+    before { authenticate_user! }
+
     resources :products do
 
-        helpers PaginationHelper
         # Endpoint, gives all products----------------------------------------------------------------------------------------
         desc 'return all products'
 

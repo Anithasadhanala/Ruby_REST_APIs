@@ -1,5 +1,5 @@
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_07_060900) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_07_114909) do
   create_table "carts", force: :cascade do |t|
     t.integer "user_id", null: false
     t.integer "product_id", null: false
@@ -15,6 +15,15 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_07_060900) do
     t.text "description", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "jwt_blacklists", force: :cascade do |t|
+    t.string "jwt_token", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["jwt_token"], name: "index_jwt_blacklists_on_jwt_token", unique: true
+    t.index ["user_id"], name: "index_jwt_blacklists_on_user_id"
   end
 
   create_table "order_times", force: :cascade do |t|
@@ -52,14 +61,12 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_07_060900) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "user_refresh_tokens", force: :cascade do |t|
+  create_table "user_jwt_tokens", force: :cascade do |t|
     t.integer "user_id", null: false
-    t.string "refresh_token", null: false
-    t.datetime "expiry_time", null: false
-    t.boolean "flag", default: true
+    t.string "jwt_token", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["user_id"], name: "index_user_refresh_tokens_on_user_id"
+    t.index ["user_id"], name: "index_user_jwt_tokens_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -76,10 +83,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_07_060900) do
 
   add_foreign_key "carts", "products"
   add_foreign_key "carts", "users"
+  add_foreign_key "jwt_blacklists", "users"
   add_foreign_key "order_times", "orders"
   add_foreign_key "order_times", "products"
   add_foreign_key "orders", "payments"
   add_foreign_key "orders", "users"
   add_foreign_key "payments", "orders"
-  add_foreign_key "user_refresh_tokens", "users"
+  add_foreign_key "user_jwt_tokens", "users"
 end

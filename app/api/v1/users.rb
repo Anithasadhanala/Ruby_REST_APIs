@@ -1,6 +1,9 @@
 class V1::Users < Grape::API
     format :json
     prefix :api
+
+
+
     resource :users do
 
       desc 'Register a new user' do

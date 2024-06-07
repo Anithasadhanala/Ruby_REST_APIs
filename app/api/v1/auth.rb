@@ -1,12 +1,12 @@
-require  'auth_helper'
 
 class V1::Auth < Grape::API
     format :json
     prefix :api
 
-    helpers AuthHelper
+
 
     resource :auth do
+
 
       # Login  Endpoint of  a user ------------------------------------------------------------------------------------------------------------------
       desc 'Login user'
@@ -19,27 +19,12 @@ class V1::Auth < Grape::API
         user = User.find_by(email: params[:email])
         if user && user.authenticate(params[:password])
 
-          payload = { user_id: user.id }
-          access_token = JWT.encode(payload, Rails.application.secrets.secret_key_base)
-          puts(Rails.application.secrets.secret_key_base,"*********************************************************************************************")
-          token = SecureRandom.uuid
-          expiry_time = 7.days.from_now
-          refresh_token_obj = UserRefreshToken.create(user: user, refresh_token: token, expiry_time: expiry_time,)
+          payload = { user_id: user.id,  expiry: Time.now.to_i + 4 + 3600  }
+          jwt = JWT.encode(payload, "SECRET")
 
-          # setting Cookie for the access_token
-          cookies[:access_token] = {
-            value: access_token,
-            httponly: true,
-            secure: Rails.env.production?
-          }
+          UserJwtToken.create!(user_id: user.id, jwt_token: jwt)
 
-          # setting Cookie for the refresh_token
-          cookies[:refresh_token] = {
-            value: token,
-            httponly: true,
-            secure: Rails.env.production?
-          }
-          { message: 'Login successful', access_token: access_token , refresh_token: token }
+          present jwt_token: jwt,  name: user.username, email: user.email
         else
           error!('Unauthorized', 401)
         end
@@ -49,42 +34,22 @@ class V1::Auth < Grape::API
 
 
 
-    # Logout Endpoint of a user -------------------------------------------------------------------------------------------------------------------
-      desc 'Logout user'
-
-      delete :logout do
-        authenticate_user!
-        access_token = cookies[:access_token]
-        refresh_token = cookies[:refresh_token]
-
-        # Verify access token
-        decoded_token = JWT.decode(access_token, Rails.application.secrets.secret_key_base, algorithm: 'HS256')
-        user_id = decoded_token[0]['user_id']
-
-
-        if user_id == Current.user.id
-          if refresh_token.present?
-           refresh_token_record = UserRefreshToken.find_by(refresh_token: refresh_token,flag: true)
-            if refresh_token_record
-              refresh_token_record.update(flag: false)
-              cookies.delete(:refresh_token)
-              cookies.delete(:access_token)
+      #Logout Endpoint of a user -------------------------------------------------------------------------------------------------------------------
+      desc  'Logout user'
+        before { authenticate_user! }
+          delete :logout do
+            puts(Current.user)
+            if Current.user
+              puts("+++++++++++++++++++++++++++++++++++++++++++")
+              header = request.headers['authorization']
+              current_jwt_token = header.split(' ').last if header
+              JwtBlacklist.create!(jwt_token: current_jwt_token, user_id: Current.user.id)
+              { message: 'Logout successful' }
+            else
+              error!('Unauthorized', 401)
             end
           end
-          { message: 'Logout successful' }
-        else
-          error!('Unauthorized', 401)
-        end
-      end
-
 
       end
-
-
-
-
-
-
-
-  end
+    end
 
