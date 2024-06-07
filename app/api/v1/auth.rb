@@ -40,7 +40,6 @@ class V1::Auth < Grape::API
           delete :logout do
             puts(Current.user)
             if Current.user
-              puts("+++++++++++++++++++++++++++++++++++++++++++")
               header = request.headers['authorization']
               current_jwt_token = header.split(' ').last if header
               JwtBlacklist.create!(jwt_token: current_jwt_token, user_id: Current.user.id)
