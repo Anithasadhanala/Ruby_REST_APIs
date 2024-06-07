@@ -1,11 +1,18 @@
 class V1::Products < Grape::API
     resources :products do
 
-
+        helpers PaginationHelper
         # Endpoint, gives all products----------------------------------------------------------------------------------------
-        desc 'return all products' 
+        desc 'return all products'
+
+        params do
+            optional :page, type: Integer, default: DEFAULT_PAGE
+            optional :per_page, type: Integer, default: DEFAULT_PER_PAGE
+        end
+
         get do
-            Product.all
+            products = paginate(Product.all)
+            present products
         end
 
 
