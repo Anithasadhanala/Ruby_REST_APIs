@@ -8,5 +8,6 @@ class Root < Grape::API
 
     mount V1::Products
     mount V1::Users
-    mount V1::Auth
+    mount V1::Categories
+    mount V1::CartItems
 end

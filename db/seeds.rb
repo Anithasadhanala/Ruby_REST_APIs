@@ -1,19 +1,12 @@
-
-# db/seeds.rb
-
-products = [
-{ name: 'TV', description: 'Indicates a positive reaction to the content' ,price: 20000},
-  { name: 'fridge', description: 'Indicates a negative reaction to the content',price: 30000 },
-  { name: 'glass', description: "Indidcates that the blog is informative",price: 20}
-
-]
-
-products.each do |product|
-    Product.find_or_create_by(name: product[:name]) do |r|
-    r.description = product[:description]
-    r.price = product[:price]
-  end
-end
-
-
-
+Category.create([
+                  { name: 'Electronics', description: 'Devices, gadgets and more' },
+                  { name: 'Books', description: 'Books from various genres and authors' },
+                  { name: 'Clothing', description: 'Men, Women and Kids clothing' },
+                  { name: 'Home Appliances', description: 'Appliances and utilities for home' },
+                  { name: 'Sports', description: 'Sports equipment and apparel' },
+                  { name: 'Toys', description: 'Toys and games for children of all ages' },
+                  { name: 'Health & Beauty', description: 'Healthcare products and beauty items' },
+                  { name: 'Automotive', description: 'Vehicle parts and accessories' },
+                  { name: 'Jewelry', description: 'Jewelry and accessories for all occasions' },
+                  { name: 'Furniture', description: 'Furniture and decor for your home' }
+                ])

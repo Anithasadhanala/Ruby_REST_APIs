@@ -4,10 +4,10 @@ class V1::Categories < Grape::API
 
   before { authenticate_user! }
 
-  resources :products do
+  resources :categories do
 
-    # Endpoint, gives all products----------------------------------------------------------------------------------------
-    desc 'return all products'
+    # Endpoint, gives all categories----------------------------------------------------------------------------------------
+    desc 'return all categories'
 
     params do
       optional :page, type: Integer, default: DEFAULT_PAGE
@@ -15,16 +15,16 @@ class V1::Categories < Grape::API
     end
 
     get do
-      products = paginate(Product.all)
-      present products
+      categories = paginate(Category.all)
+      present categories
     end
 
 
 
-    # Endpoint to get a specific product by ID-------------------------------------------------------------------------------
+    # Endpoint to get a specific category by ID-------------------------------------------------------------------------------
     desc 'Return a specific product' do
-      success V1::Entities::SingleProduct
-      failure [[404, 'Product Not Found'], [500, 'Internal Server Error']]
+      success V1::Entities::SingleCategory
+      failure [[404, 'Category Not Found'], [500, 'Internal Server Error']]
     end
 
     params do
@@ -32,11 +32,11 @@ class V1::Categories < Grape::API
     end
 
     get ':id' do
-      product = Product.find_by(id: params[:id])
-      if product
-        present product, with: V1::Entities::SingleProduct
+      category = Category.find_by(id: params[:id])
+      if category
+        present category, with: V1::Entities::SingleCategory
       else
-        error!({ error: 'Product Not Found' }, 404)
+        error!({ error: 'category Not Found' }, 404)
       end
     rescue => e # catch like implementation
       error!({ error: e.message }, 500)
@@ -45,21 +45,20 @@ class V1::Categories < Grape::API
 
 
 
-    # Endpoint to create a new product---------------------------------------------------------------------------------------
-    desc 'Create a new product'do
-      success V1::Entities::CreateProduct
+    # Endpoint to create a new category---------------------------------------------------------------------------------------
+    desc 'Create a new category'do
+      success V1::Entities::CreateItem
       failure [422, 'DB not saved']
     end
 
     params do
       requires :name, type: String
-      requires :price, type: Integer
       requires :description, type: String
     end
 
     post do
-      product = Product.create!(name: params[:name],price: params[:price],description: params[:description])
-      present product, with: V1::Entities::CreateProduct
+      category = Category.create!(name: params[:name],description: params[:description])
+      present category, with: V1::Entities::CreateItem
     rescue ActiveRecord::RecordInvalid => e
       error!({ error: e.message }, 422)
     end
@@ -67,28 +66,27 @@ class V1::Categories < Grape::API
 
 
 
-    # Endpoint for updating a specific product---------------------------------------------------------------------------------
-    desc 'Update a product' do
-      success V1::Entities::SingleProduct
-      failure [[404, 'Product Not Found'],[422, 'DB not saved']]
+    # Endpoint for updating a specific category---------------------------------------------------------------------------------
+    desc 'Update a category' do
+      success V1::Entities::SingleCategory
+      failure [[404, 'category Not Found'],[422, 'DB not saved']]
     end
 
     params do
       requires :id, type: Integer
       optional :name, type: String
-      optional :price, type: Integer
       optional :description, type: String
     end
 
     put ':id' do
-      product = Product.find(params[:id])
-      error!('Product Not Found', 404) unless product
+      category = Category.find(params[:id])
+      error!('category Not Found', 404) unless category
 
       # Here declared method for filtering the params accordingly
       # include_missing is not taking the params for updating which are not provided
-      product.update(declared(params, include_missing: false))
+      category.update(declared(params, include_missing: false))
 
-      present product, with: V1::Entities::SingleProduct
+      present category, with: V1::Entities::SingleCategory
 
     rescue ActiveRecord::RecordInvalid => e
       error!({ error: e.message }, 422)
@@ -96,11 +94,10 @@ class V1::Categories < Grape::API
 
 
 
-
-    # Endpoint that deletes a specific product----------------------------------------------------------------------------------
-    desc 'Delete a product'do
+    # Endpoint that deletes a specific category----------------------------------------------------------------------------------
+    desc 'Delete a category'do
       success [200, 'Hurry!, deleted successfully']
-      failure [[404, 'Product Not Found'], [500, 'Internal Server Error']]
+      failure [[404, 'category Not Found'], [500, 'Internal Server Error']]
     end
 
     params do
@@ -108,12 +105,12 @@ class V1::Categories < Grape::API
     end
 
     delete ':id' do
-      product = Product.find_by(id: params[:id])
-      if product
-        product.destroy
+      category = Category.find_by(id: params[:id])
+      if category
+        category.destroy
         { message: 'Hurry!, deleted successfully' }
       else
-        error!({ error: 'Product Not Found' }, 404)
+        error!({ error: 'category Not Found' }, 404)
       end
     end
   end

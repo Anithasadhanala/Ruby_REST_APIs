@@ -47,7 +47,7 @@ class V1::Products < Grape::API
         
         # Endpoint to create a new product---------------------------------------------------------------------------------------
         desc 'Create a new product'do
-            success V1::Entities::CreateProduct
+            success V1::Entities::CreateItem
             failure [422, 'DB not saved']
         end
 
@@ -55,11 +55,12 @@ class V1::Products < Grape::API
             requires :name, type: String
             requires :price, type: Integer
             requires :description, type: String
+            requires :category_id, type: Integer
         end
 
         post do
-            product = Product.create!(name: params[:name],price: params[:price],description: params[:description])
-            present product, with: V1::Entities::CreateProduct
+            product = Product.create!(name: params[:name],price: params[:price],description: params[:description],category_id: params[:category_id])
+            present product, with: V1::Entities::CreateItem
             rescue ActiveRecord::RecordInvalid => e
             error!({ error: e.message }, 422)
         end
