@@ -2,8 +2,6 @@ class V1::Users < Grape::API
     format :json
 
 
-
-
     resource :users do
 
       desc 'Register a new user' do
@@ -36,26 +34,47 @@ class V1::Users < Grape::API
 
 
     # Login  Endpoint of  a user ------------------------------------------------------------------------------------------------------------------
-    desc 'Login user'
-    params do
-      requires :email, type: String
-      requires :password, type: String
-    end
-
-    post :login do
-      user = User.find_by(email: params[:email])
-      if user && user.authenticate(params[:password])
-
-        payload = { user_id: user.id,  expiry: Time.now.to_i + 4 + 3600  }
-        jwt = JWT.encode(payload, "SECRET")
-
-        UserJwtToken.create!(user_id: user.id, jwt_token: jwt)
-
-        present jwt_token: jwt,  name: user.username, email: user.email
-      else
-        error!('Unauthorized', 401)
+      desc 'Login user'
+      params do
+        requires :email, type: String
+        requires :password, type: String
       end
-    end
+
+      post :login do
+        user = User.find_by(email: params[:email])
+        if user && user.authenticate(params[:password])
+
+          # Check for an existing valid JWT token, if exists then check for the unexpired token
+          existing_tokens = UserJwtToken.where(user_id: user.id).order(created_at: :desc)
+
+          valid_token = existing_tokens.detect do |token|
+            begin
+              decoded_token = JWT.decode(token.jwt_token, "SECRET", true, algorithm: 'HS256')
+              token_expiry = decoded_token[0]['expiry']
+              Time.now.to_i < token_expiry
+            rescue JWT::DecodeError
+              false
+            end
+          end
+
+          if valid_token
+            present jwt_token: valid_token.jwt_token, name: user.username, email: user.email
+            return
+          end
+
+          # Create a new JWT token if no valid existing token is found
+          payload = { user_id: user.id, expiry: Time.now.to_i + 360000 }
+          jwt = JWT.encode(payload, "SECRET")
+
+          # Create a new UserJwtToken record
+          UserJwtToken.create!(user_id: user.id, jwt_token: jwt,is_active: true)
+
+          present jwt_token: jwt, name: user.username, email: user.email
+        else
+          error!('Unauthorized', 401)
+        end
+      end
+
 
 
 
@@ -69,12 +88,17 @@ class V1::Users < Grape::API
       if Current.user
         header = request.headers['authorization']
         current_jwt_token = header.split(' ').last if header
-        JwtBlacklist.create!(jwt_token: current_jwt_token, user_id: Current.user.id)
-        { message: 'Logout successful' }
+        jwt_blacklist_record = UserJwtToken.find_by(jwt_token: current_jwt_token)
+
+        if jwt_blacklist_record
+          jwt_blacklist_record.update!(is_active: false)
+          { message: 'Logout successful' }
+        else
+          error!('Unauthorized', 401)
+        end
       else
         error!('Unauthorized', 401)
       end
     end
-
+      end
 end
-    end

@@ -10,16 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_08_130657) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_11_171056) do
   create_table "carts", force: :cascade do |t|
     t.integer "user_id", null: false
     t.integer "product_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.boolean "flag"
+    t.boolean "is_deleted", default: false
     t.integer "quantity", default: 1
-    t.integer "category_id"
-    t.index ["category_id"], name: "index_carts_on_category_id"
     t.index ["product_id"], name: "index_carts_on_product_id"
     t.index ["user_id"], name: "index_carts_on_user_id"
   end
@@ -31,22 +29,13 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_08_130657) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "jwt_blacklists", force: :cascade do |t|
-    t.string "jwt_token", null: false
-    t.integer "user_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["jwt_token"], name: "index_jwt_blacklists_on_jwt_token", unique: true
-    t.index ["user_id"], name: "index_jwt_blacklists_on_user_id"
-  end
-
-  create_table "order_times", force: :cascade do |t|
+  create_table "order_items", force: :cascade do |t|
     t.integer "order_id", null: false
     t.integer "product_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["order_id"], name: "index_order_times_on_order_id"
-    t.index ["product_id"], name: "index_order_times_on_product_id"
+    t.index ["order_id"], name: "index_order_items_on_order_id"
+    t.index ["product_id"], name: "index_order_items_on_product_id"
   end
 
   create_table "orders", force: :cascade do |t|
@@ -82,6 +71,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_08_130657) do
     t.string "jwt_token", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "is_active", default: true
     t.index ["user_id"], name: "index_user_jwt_tokens_on_user_id"
   end
 
@@ -97,12 +87,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_08_130657) do
     t.datetime "updated_at", null: false
   end
 
-  add_foreign_key "carts", "categories"
   add_foreign_key "carts", "products"
   add_foreign_key "carts", "users"
-  add_foreign_key "jwt_blacklists", "users"
-  add_foreign_key "order_times", "orders"
-  add_foreign_key "order_times", "products"
+  add_foreign_key "order_items", "orders"
+  add_foreign_key "order_items", "products"
   add_foreign_key "orders", "payments"
   add_foreign_key "orders", "users"
   add_foreign_key "payments", "orders"

@@ -22,7 +22,7 @@ class V1::Categories < Grape::API
 
 
     # Endpoint to get a specific category by ID-------------------------------------------------------------------------------
-    desc 'Return a specific product' do
+    desc 'Return a specific category' do
       success V1::Entities::SingleCategory
       failure [[404, 'Category Not Found'], [500, 'Internal Server Error']]
     end
@@ -95,23 +95,44 @@ class V1::Categories < Grape::API
 
 
     # Endpoint that deletes a specific category----------------------------------------------------------------------------------
-    desc 'Delete a category'do
+    desc 'Delete a category' do
       success [200, 'Hurry!, deleted successfully']
-      failure [[404, 'category Not Found'], [500, 'Internal Server Error']]
+      failure [[404, 'Category Not Found'], [500, 'Internal Server Error']]
     end
 
     params do
       requires :id, type: Integer
     end
 
+
     delete ':id' do
       category = Category.find_by(id: params[:id])
       if category
-        category.destroy
-        { message: 'Hurry!, deleted successfully' }
+        linked_products_count = category.products.count
+
+        if linked_products_count > 0
+          { message: "{Category #{params[:id]} has #{linked_products_count} linked products. Please update category name, if you want." }
+        else
+          category.destroy
+          { message: 'Hurry!, deleted successfully' }
+        end
       else
-        error!({ error: 'category Not Found' }, 404)
+        error!({ error: 'Category Not Found' }, 404)
       end
     end
+
   end
-end
+
+
+
+
+
+
+
+
+
+
+
+
+
+  end

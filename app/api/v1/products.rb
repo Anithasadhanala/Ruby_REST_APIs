@@ -7,15 +7,42 @@ class V1::Products < Grape::API
     resources :products do
 
         # Endpoint, gives all products----------------------------------------------------------------------------------------
-        desc 'return all products'
-
+        desc 'Return all products'
         params do
-            optional :page, type: Integer, default: DEFAULT_PAGE
-            optional :per_page, type: Integer, default: DEFAULT_PER_PAGE
+            optional :category_id, type: Integer, desc: 'ID of the category to filter by'
+            optional :sort_by, type: String, values: %w[name price], desc: 'Sort by name or price'
+            optional :sort_order, type: String, values: %w[asc desc], desc: 'Sort order: ascending or descending'
+            optional :search, type: String, desc: 'Search keyword to filter products'
+            optional :min_price, type: Float, desc: 'Minimum price for filtering'
+            optional :max_price, type: Float, desc: 'Maximum price for filtering'
+            optional :color, type: String, desc: 'Color for filtering'
+            optional :page, type: Integer, default: DEFAULT_PAGE, desc: 'Page number for pagination'
+            optional :per_page, type: Integer, default: DEFAULT_PER_PAGE, desc: 'Number of products per page'
         end
 
         get do
-            products = paginate(Product.all)
+            products = Product.includes(:category)
+
+            # Filter by category
+            products = products.where(category_id: params[:category_id]) if params[:category_id]
+
+            # Sorting
+            if params[:sort_by]
+                sort_column = params[:sort_by] == 'price' ? 'price' : 'name'
+                sort_order = params[:sort_order] == 'desc' ? 'desc' : 'asc'
+                products = products.order("#{sort_column} #{sort_order}")
+            end
+
+            # Search
+            products = products.where('name LIKE ?', "%#{params[:search]}%") if params[:search]
+
+            # Filtering by price range
+            products = products.where('price >= ?', params[:min_price]) if params[:min_price]
+            products = products.where('price <= ?', params[:max_price]) if params[:max_price]
+
+            # Pagination
+            products = paginate(products)
+
             present products
         end
 

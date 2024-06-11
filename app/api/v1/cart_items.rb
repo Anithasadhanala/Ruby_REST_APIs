@@ -53,19 +53,19 @@ class V1::CartItems < Grape::API
 
     params do
       requires :product_id, type: Integer
-      requires :category_id, type: Integer
+      requires :category_id, type: Integer # change
       optional :quantity, type: Integer, default: 1
     end
 
     post do
 
-      cart_item = Cart.find_by(product_id: params[:product_id],user_id: Current.user.id)
-
+      cart_item = Cart.find_by(product_id: params[:product_id],user_id: Current.user.id, flag: true)
+      # handling if that item is already present in the cart
       if cart_item.nil?
         cart_item = Cart.create!(product_id: params[:product_id],user_id: Current.user.id, quantity: params[:quantity], flag: true,category_id:[:category_id])
         present cart_item, with: V1::Entities::CreateItem
       else
-        cart_item.update(quantity: params[:quantity])
+        cart_item.update(quantity: cart_item.quantity + 1)
         message = "Product already exists in the cart. Quantity updated."
         present message: message, cart_item: cart_item
       end
@@ -83,6 +83,7 @@ class V1::CartItems < Grape::API
       success V1::Entities::CartItem
       failure [[404, 'Product Not Found'],[422, 'DB not saved']]
     end
+
 
     params do
       requires :product_id, type: Integer
