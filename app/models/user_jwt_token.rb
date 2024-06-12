@@ -3,3 +3,4 @@ class UserJwtToken < ApplicationRecord
 
   validates :jwt_token, presence: true, uniqueness: true
 end
+

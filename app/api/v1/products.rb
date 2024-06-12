@@ -83,10 +83,11 @@ class V1::Products < Grape::API
             requires :price, type: Integer
             requires :description, type: String
             requires :category_id, type: Integer
+            requires :seller_id, type: Integer
         end
 
         post do
-            product = Product.create!(name: params[:name],price: params[:price],description: params[:description],category_id: params[:category_id])
+            product = Product.create!(name: params[:name],price: params[:price],description: params[:description],category_id: params[:category_id], seller_id: params[:seller_id])
             present product, with: V1::Entities::CreateItem
             rescue ActiveRecord::RecordInvalid => e
             error!({ error: e.message }, 422)

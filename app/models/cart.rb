@@ -1,5 +1,5 @@
 class Cart < ApplicationRecord
-  belongs_to :user
+  belongs_to :buyer, class_name: 'User'
   belongs_to :product
 
   validates :user_id, presence: true
@@ -9,3 +9,6 @@ class Cart < ApplicationRecord
 
 
 end
+
+
+

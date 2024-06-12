@@ -19,6 +19,7 @@ module AuthenticationHelper
 
         # Check if the token is blacklisted
         if UserJwtToken.exists?(jwt_token: token, is_active: false)
+          puts("===============================================")
           error!('Unauthorized', 401)
         else
           Current.user = User.find(data[0]['user_id'])

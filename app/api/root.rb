@@ -10,4 +10,6 @@ class Root < Grape::API
     mount V1::Users
     mount V1::Categories
     mount V1::CartItems
+    mount V1::Reviews
+    mount V1::Ratings
 end
