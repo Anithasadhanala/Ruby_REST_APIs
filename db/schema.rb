@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_12_181521) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_13_090831) do
   create_table "addresses", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "state", null: false
@@ -74,6 +74,13 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_12_181521) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "delivery_zones", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "description", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "order_items", force: :cascade do |t|
     t.integer "order_id", null: false
     t.integer "product_id", null: false
@@ -130,11 +137,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_12_181521) do
   end
 
   create_table "seller_details", force: :cascade do |t|
-    t.integer "buyer_id", null: false
+      t.integer "buyer_id", null: false
     t.string "store_name", null: false
     t.string "store_license", null: false
-    t.string "work_phone", null: false
-    t.float "avg_rating"
+    t.integer "work_phone", null: false
+    t.float "avg_rating", default: 0.0
     t.boolean "is_active", default: true
     t.string "store_logo"
     t.datetime "created_at", null: false
@@ -183,6 +190,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_12_181521) do
     t.boolean "flag", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "role", default: "", null: false
   end
 
   add_foreign_key "addresses", "users"

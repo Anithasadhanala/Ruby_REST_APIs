@@ -1,0 +1,3 @@
+class DeliveryZone < ApplicationRecord
+
+end

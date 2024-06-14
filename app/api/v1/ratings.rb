@@ -65,8 +65,7 @@ class V1::Ratings < Grape::API
         rescue ActiveRecord::RecordInvalid => e
           error!({ error: e.message }, 422)
         end
-        end
-
-
+      end
+      end
   end
 end
